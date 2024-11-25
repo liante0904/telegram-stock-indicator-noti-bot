@@ -105,7 +105,7 @@ async def analyze_sp500():
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
                 print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n")
-                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n"
+                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n\n\n"
     return str_msg
 
 # 메인 함수 실행
