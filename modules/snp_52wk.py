@@ -71,6 +71,7 @@ async def get_company_profile(ticker):
 # 메인 함수: S&P 500 종목 분석
 async def analyze_sp500():
     print("S&P 500 종목 목록을 네이버 API에서 가져오는 중...")
+    str_msg = ''
     sp500_tickers = get_sp500_symbols_from_naver()
     if not sp500_tickers:
         print("S&P 500 목록을 가져오지 못했습니다.")
@@ -104,6 +105,8 @@ async def analyze_sp500():
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
                 print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n")
+                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n"
+    return str_msg
 
 # 메인 함수 실행
-asyncio.run(analyze_sp500())
+# asyncio.run(analyze_sp500())

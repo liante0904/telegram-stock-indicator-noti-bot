@@ -67,7 +67,9 @@ async def get_company_profile(ticker):
 
 # 메인 함수: NASDAQ 100 종목 분석
 async def analyze_nasdaq100():
+    
     print("NASDAQ 100 종목 목록을 네이버 API에서 가져오는 중...")
+    str_msg = ''
     nasdaq100_tickers = get_nasdaq100_symbols_from_naver()
     if not nasdaq100_tickers:
         print("NASDAQ 100 목록을 가져오지 못했습니다.")
@@ -105,6 +107,9 @@ async def analyze_nasdaq100():
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
                 print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n")
+                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n"
+
+    return str_msg
 
 # 메인 함수 실행
-asyncio.run(analyze_nasdaq100())
+# asyncio.run(analyze_nasdaq100())
