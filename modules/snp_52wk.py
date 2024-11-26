@@ -93,7 +93,31 @@ async def analyze_sp500():
                 continue  # 52주 신고가가 아니면 건너뜀
             profile = await get_company_profile(ticker)
             high_52_week_stocks.append((ticker, profile['sector'], profile['description']))
+            print(f"{ticker}: 52주 신고가 종목으로 추가됨.")
 
+    print('=' * 40)
+    print("S&P 500 52주 신고가 종목 리스트")
+    print('=' * 40)
+    
+    high_52_week_stocks_list = "S&P 500 52주 신고가 종목 리스트\n\n"
+    
+    if not high_52_week_stocks:
+        print("\n52주 신고가 종목이 없습니다.")
+    else:
+        # 고정폭 글꼴을 사용한 표 형식
+        header = f"{'티커':<10} {'업종':<20}"
+        separator = "-" * len(header)
+        high_52_week_stocks_list += "```\n"  # 시작 부분에 줄바꿈 추가
+        high_52_week_stocks_list += header + "\n"  # 헤더 뒤에 줄바꿈 추가
+        high_52_week_stocks_list += separator + "\n"  # 구분선 뒤에 줄바꿈 추가
+
+        for ticker, sector, description in high_52_week_stocks:
+            high_52_week_stocks_list += f"{ticker:<10} {sector:<20}\n"  # 각 항목 뒤에 줄바꿈 추가
+
+        high_52_week_stocks_list += "```"
+
+        print(high_52_week_stocks_list)
+        
     if not high_52_week_stocks:
         print("\n52주 신고가 종목이 없습니다.")
     else:
@@ -105,9 +129,19 @@ async def analyze_sp500():
         for sector, group in grouped_by_sector:
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
-                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n")
-                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n\n\n"
-    return str_msg
+                # print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 원본
+                
+                # 'Business Profile'을 문단별로 나누어 처리
+                sentences = row['Business Profile'].split('다.')
 
-# 메인 함수 실행
-# asyncio.run(analyze_sp500())
+                # 첫 4문단만 합쳐서 다시 row['Business Profile']에 저장
+                paragraphs = [sentence.strip() + '다.' for sentence in sentences[0:3]]
+                row['Business Profile'] = ' '.join(paragraphs)
+                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 요약
+                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n\n\n"
+                
+    return high_52_week_stocks_list, str_msg
+
+if __name__ == '__main__':
+    # 메인 함수 실행
+    asyncio.run(analyze_sp500())
