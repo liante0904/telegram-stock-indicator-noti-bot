@@ -123,7 +123,14 @@ async def analyze_sp500():
     else:
         # 결과를 데이터프레임으로 정리
         high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Sector', 'Business Profile'])
+
+
+        # 업종별로 그룹화하여 출력
         grouped_by_sector = high_52_week_df.groupby('Sector')
+        for sector, group in grouped_by_sector:
+            print(f"\n업종: {sector}")
+            for idx, row in group.iterrows():
+                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}")
 
         print("\nS&P 500 52주 신고가 종목 (업종별 분류 및 한글 번역된 사업내용 포함):")
         for sector, group in grouped_by_sector:
