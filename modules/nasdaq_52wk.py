@@ -131,7 +131,7 @@ async def analyze_nasdaq100():
         for sector, group in grouped_by_sector:
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
-                print(f"티커: {row['Ticker']}\n사업내용:")
+                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}")
 
 
         print("\nNASDAQ 100 52주 신고가 종목 (업종별 분류 및 한글 번역된 사업내용 포함):")
