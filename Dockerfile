@@ -6,12 +6,18 @@ WORKDIR /app
 
 # 의존성 파일 복사 및 설치
 COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Flask 앱 파일 복사
 COPY main.py main.py
 COPY .env .env
 COPY modules/ modules/  
+COPY utils/ utils/  
+
+
+# 로컬 fonts 폴더를 Docker 컨테이너로 복사
+COPY ./fonts /usr/share/fonts/
+
+RUN  pip install --no-cache-dir -r requirements.txt 
 
 # 컨테이너에서 main 실행
 CMD ["python", "main.py"]

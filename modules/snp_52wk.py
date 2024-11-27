@@ -7,7 +7,27 @@ import asyncio
 from tqdm import tqdm
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
+now = datetime.now()
+
+print("현재 : ", now)
+print("현재 날짜 : ", now.date())
+print("현재 시간 : ", now.time())
+print("timestamp : ", now.timestamp())
+print("년 : ", now.year)
+print("월 : ", now.month)
+print("일 : ", now.day)
+print("시 : ", now.hour)
+print("분 : ", now.minute)
+print("초 : ", now.second)
+print("마이크로초 : ", now.microsecond)
+print("요일 : ", now.weekday())
+print("문자열 변환 : ", now.strftime('%Y%m%d')[2:8])
+
+pdf_file_name = f"{now.strftime('%Y%m%d')[2:8]}_snp500_52wk_high.pdf"
+
+from utils.pdf_util import create_pdf
 
 # 현재 파일 기준으로 상위 디렉토리에 있는 .env 파일 경로 설정
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -123,24 +143,36 @@ async def analyze_sp500():
     else:
         # 결과를 데이터프레임으로 정리
         high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Sector', 'Business Profile'])
-        grouped_by_sector = high_52_week_df.groupby('Sector')
 
-        print("\nS&P 500 52주 신고가 종목 (업종별 분류 및 한글 번역된 사업내용 포함):")
+
+        # 업종별로 그룹화하여 출력
+        grouped_by_sector = high_52_week_df.groupby('Sector')
         for sector, group in grouped_by_sector:
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
-                # print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 원본
-                
-                # 'Business Profile'을 문단별로 나누어 처리
-                sentences = row['Business Profile'].split('다.')
+                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}")
 
-                # 첫 4문단만 합쳐서 다시 row['Business Profile']에 저장
-                paragraphs = [sentence.strip() + '다.' for sentence in sentences[0:3]]
-                row['Business Profile'] = ' '.join(paragraphs)
-                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 요약
-                str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n\n\n"
+        print("\nS&P 500 52주 신고가 종목 (업종별 분류 및 한글 번역된 사업내용 포함):")
+        # PDF 생성
+        send_pdf_file_name = ''
+        if grouped_by_sector:
+            send_pdf_file_name = create_pdf(pdf_file_name, grouped_by_sector)
+        else:
+            print(f"52주 신고가 데이터가 없거나 올바르지 않습니다. => {grouped_by_sector}")
+        return high_52_week_stocks_list, send_pdf_file_name
+        # for sector, group in grouped_by_sector:
+            # print(f"\n업종: {sector}")
+            # for idx, row in group.iterrows():
+            #     # print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 원본
                 
-    return high_52_week_stocks_list, str_msg
+            #     # 'Business Profile'을 문단별로 나누어 처리
+            #     sentences = row['Business Profile'].split('다.')
+
+            #     # 첫 4문단만 합쳐서 다시 row['Business Profile']에 저장
+            #     paragraphs = [sentence.strip() + '다.' for sentence in sentences[0:3]]
+            #     row['Business Profile'] = ' '.join(paragraphs)
+            #     print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 요약
+            #     str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n\n\n"
 
 if __name__ == '__main__':
     # 메인 함수 실행
