@@ -122,7 +122,8 @@ async def analyze_sp500():
     high_52_week_stocks_list = "S&P 500 52주 신고가 종목 리스트\n\n"
     
     if not high_52_week_stocks:
-        print("\n52주 신고가 종목이 없습니다.")
+        high_52_week_stocks_list += "\n52주 신고가 종목이 없습니다."
+        print(f"{high_52_week_stocks_list}")
     else:
         # 고정폭 글꼴을 사용한 표 형식
         header = f"{'티커':<10} {'업종':<20}"
