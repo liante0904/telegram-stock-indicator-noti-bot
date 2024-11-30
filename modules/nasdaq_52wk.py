@@ -111,6 +111,8 @@ async def analyze_nasdaq100():
                 continue  # 52주 신고가가 아니면 건너뜀
             profile = await get_company_profile(ticker)
             high_52_week_stocks.append((ticker, profile['sector'], profile['description']))
+            # profile['sector'] 기준으로 정렬
+            high_52_week_stocks.sort(key=lambda x: x[1])  # sector(두 번째 요소) 기준으로 정렬
             print(f"{ticker}: 52주 신고가 종목으로 추가됨.")
 
     print('=' * 40)
