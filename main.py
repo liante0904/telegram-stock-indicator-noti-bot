@@ -85,32 +85,35 @@ def sendMarkDownText(token, chat_id, sendMessageText=None, file=None,title=None,
 async def main():
     # Analyze NASDAQ and SP500
     high_52_week_stocks, nsd100_pdf_file_name = await analyze_nasdaq100()
-    sendMarkDownText(
-        token=token,
-        chat_id=chat_id,
-        sendMessageText=high_52_week_stocks,
-        is_markdown=True  # Markdown을 사용할 때는 True로 설정
-    )
+    if high_52_week_stocks:
+        sendMarkDownText(
+            token=token,
+            chat_id=chat_id,
+            sendMessageText=high_52_week_stocks,
+            is_markdown=True  # Markdown을 사용할 때는 True로 설정
+        )
     
     high_52_week_stocks, snp500_pdf_file_name = await analyze_sp500()
-    sendMarkDownText(
-        token=token,
-        chat_id=chat_id,
-        sendMessageText=high_52_week_stocks,
-        is_markdown=True  # Markdown을 사용할 때는 True로 설정
-    )
-
-    # pdf 전송
-    sendMarkDownText(
-        token=token,
-        chat_id=chat_id,
-        file=nsd100_pdf_file_name
-    )
-    sendMarkDownText(
-        token=token,
-        chat_id=chat_id,
-        file=snp500_pdf_file_name
-    )
+    if high_52_week_stocks:
+        sendMarkDownText(
+            token=token,
+            chat_id=chat_id,
+            sendMessageText=high_52_week_stocks,
+            is_markdown=True  # Markdown을 사용할 때는 True로 설정
+        )
+    if nsd100_pdf_file_name:
+        # pdf 전송
+        sendMarkDownText(
+            token=token,
+            chat_id=chat_id,
+            file=nsd100_pdf_file_name
+        )
+    if snp500_pdf_file_name:
+        sendMarkDownText(
+            token=token,
+            chat_id=chat_id,
+            file=snp500_pdf_file_name
+        )
 
     
 
