@@ -15,7 +15,6 @@ font_dir = os.getenv('FONT_DIR')
 
 # PDF 작성 함수
 def create_pdf(filename, data):
-    print(data)
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=5)
     pdf.add_page()
