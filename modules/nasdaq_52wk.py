@@ -4,6 +4,7 @@ import pandas as pd
 from googletrans import Translator
 import numpy as np
 import asyncio
+import sys
 from tqdm import tqdm
 import os
 from dotenv import load_dotenv
@@ -26,6 +27,15 @@ print("요일 : ", now.weekday())
 print("문자열 변환 : ", now.strftime('%Y%m%d')[2:8])
 
 pdf_file_name = f"{now.strftime('%Y%m%d')[2:8]}_nsd100_52wk_high.pdf"
+
+# 현재 파일 기준으로 상위 디렉토리에 있는 .env 파일 경로 설정
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+env_path = os.path.join(base_dir, '.env')
+load_dotenv(dotenv_path=env_path)
+
+# 현재 스크립트의 상위 디렉터리 경로를 추가
+sys.path.append(base_dir)
 
 from utils.pdf_util import create_pdf
 
