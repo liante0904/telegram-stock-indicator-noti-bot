@@ -5,6 +5,8 @@ from io import BytesIO
 import os
 import tempfile
 import warnings
+import re
+
 warnings.filterwarnings("ignore", message="cmap value too big/small")
 
 from dotenv import load_dotenv
@@ -13,8 +15,51 @@ load_dotenv()
 env = os.getenv('ENV')
 font_dir = os.getenv('FONT_DIR')
 
-# PDF 작성 함수
+
+def is_valid_ticker(ticker):
+    """Ticker 유효성 검사 함수
+
+    Args:
+        ticker (str): 검사할 Ticker 문자열
+
+    Returns:
+        bool: 유효하면 True, 아니면 False
+    """
+    ticker_pattern = r'^[A-Z0-9-]+$'
+    return re.match(ticker_pattern, ticker)
+
+def download_image(url, filename):
+    """이미지 다운로드 함수
+
+    Args:
+        url (str): 이미지 URL
+        filename (str): 저장할 파일 이름
+
+    Returns:
+        str: 저장된 파일 경로 또는 에러 메시지
+    """
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # HTTP 에러 발생 시 예외 발생
+
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+        return filename
+    except requests.exceptions.RequestException as e:
+        return f"이미지 다운로드 실패: {e}"
+    except Exception as e:
+        return f"기타 오류 발생: {e}"
+
 def create_pdf(filename, data):
+    """PDF 생성 함수
+
+    Args:
+        filename (str): 생성할 PDF 파일 이름
+        data (DataFrame): 생성할 PDF에 사용할 데이터
+
+    Returns:
+        str: 생성된 PDF 파일 이름 또는 에러 메시지
+    """
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=5)
     pdf.add_page()
@@ -23,59 +68,38 @@ def create_pdf(filename, data):
     pdf.add_font('NanumGothic', '', f'{font_dir}/NanumGothic.ttf', uni=True)
     pdf.add_font('NanumGothic-Bold', '', f'{font_dir}/NanumGothicBold.ttf', uni=True)
 
-    # 데이터가 그룹화된 상태일 경우
     for sector, group in data:
         pdf.set_text_color(0, 0, 0)
-        
-        # 각 섹터 제목을 굵은 폰트로 출력
         pdf.set_font('NanumGothic-Bold', size=18)
         pdf.cell(200, 10, txt=f"섹터: {sector}", ln=True)
 
-        # 각 그룹 내의 항목들을 출력
         for _, item in group.iterrows():
-            # 티커를 굵은 폰트로 출력
             pdf.set_font('NanumGothic-Bold', size=18)
             pdf.cell(200, 10, txt=f"티커: {item['Ticker']}", ln=True)
 
-            # 이미지 삽입
-            pdf.ln(10)  # 줄 간격 추가
-            try:
-                # 이미지 URL 설정
-                img_url = f"https://finviz.com/chart.ashx?t={item['Ticker']}&ty=c&ta=1&p=d"
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15'
-                }
-                
-                # 이미지 다운로드
-                response = requests.get(img_url, headers=headers)
-                if response.status_code == 200:
-                    img_data = BytesIO(response.content)
-                    
-                    # 임시 파일 생성
-                    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_img:
-                        temp_img.write(img_data.getvalue())
-                        temp_img_path = temp_img.name
+            pdf.ln(10)
 
-                    # 이미지 삽입
-                    pdf.image(temp_img_path, x=10, y=None, w=100)
+            ticker = item['Ticker']
+            if is_valid_ticker(ticker):
+                img_url = f"https://finviz.com/chart.ashx?t={ticker}&ty=c&ta=1&p=d"
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_img:
+                    img_path = download_image(img_url, temp_img.name)
+                    if img_path.endswith('.png'):
+                        pdf.image(img_path, x=10, y=None, w=100)
+                    else:
+                        pdf.set_font('NanumGothic', size=12)
+                        pdf.cell(0, 10, txt=img_path, ln=True)
 
-                    # 임시 파일 삭제
-                    os.remove(temp_img_path)
-                else:
-                    pdf.set_font('NanumGothic', size=12)
-                    pdf.cell(0, 10, txt="이미지를 불러오는 데 실패했습니다.", ln=True)
-            except Exception as e:
+                os.remove(temp_img.name)
+            else:
                 pdf.set_font('NanumGothic', size=12)
-                pdf.cell(0, 10, txt=f"이미지 삽입 중 오류 발생: {e}", ln=True)
-                
-            pdf.ln(10)  # 줄 간격 추가
-            
-            # 사업 내용을 기본 스타일로 출력
+                # pdf.cell(0, 10, txt=f"잘못된 Ticker 값: {ticker}", ln=True)
+
+            pdf.ln(10)
             pdf.set_font('NanumGothic', size=16)
             pdf.multi_cell(0, 10, txt=f"사업내용: {item['Business Profile']}", align="L")
-            
 
-            pdf.ln(20)  # 다음 아이템과의 간격 추가
+            pdf.ln(20)
 
     pdf.output(filename)
     return filename
