@@ -38,9 +38,22 @@ def download_image(url, filename):
     Returns:
         str: 저장된 파일 경로 또는 에러 메시지
     """
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+        )
+    }
     try:
-        response = requests.get(url)
+
+        # User-Agent 헤더를 포함하여 요청
+        # 리다이렉트를 따라가기 위해 allow_redirects=True 사용 (기본값이 True)
+        response = requests.get(url, headers=headers, allow_redirects=True)
         response.raise_for_status()  # HTTP 에러 발생 시 예외 발생
+
+        # 최종 리다이렉트된 URL 확인 (필요 시)
+        final_url = response.url
+        print(f"리다이렉트된 최종 URL: {final_url}")
 
         with open(filename, 'wb') as f:
             f.write(response.content)
@@ -49,6 +62,7 @@ def download_image(url, filename):
         return f"이미지 다운로드 실패: {e}"
     except Exception as e:
         return f"기타 오류 발생: {e}"
+
 
 def create_pdf(filename, data):
     """PDF 생성 함수
