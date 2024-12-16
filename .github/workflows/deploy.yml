@@ -44,32 +44,25 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
-          cd $PROJECT_DIR  # 실제 배포할 프로젝트 경로
-          echo "Current directory: $(pwd)"
+
+        # 실제 배포할 프로젝트 경로
           cd ${{ secrets.PROJECT_DIR }}
-          echo "Current directory: $(pwd)"
 
           # Git 업데이트
           git fetch --all && git reset --hard origin/master
           git pull origin master
 
+          # .env 갱신
+          cp -rf .env ./jp/.
+          cp -rf .env ./us/.
           
-          # Docker 빌드 및 배포
-          echo "Building Docker image for ${{ secrets.PROJECT_NAME }} ..."
-      
-          # Docker 이미지 빌드 (docker buildx 제거)
-          docker build -t ${{ secrets.PROJECT_NAME }}:latest ${{ secrets.PROJECT_DIR }}
-
-          # 기존 컨테이너가 있을 경우 제거
-          EXISTING_CONTAINER=$(docker ps -q -f name=${{ secrets.PROJECT_NAME }})
-          if [ -n "$EXISTING_CONTAINER" ]; then
-            docker stop $EXISTING_CONTAINER
-          fi
-        
-          # 기존 컨테이너 제거
-          docker rm -f ${{ secrets.PROJECT_NAME }}
+          # fonts 폴더 갱신
+          cp -rf fonts/ jp/
+          cp -rf fonts/ us/
+          # Docker-compose로 배포
+          echo "Deploying with Docker Compose for ${{ secrets.PROJECT_NAME }} ..."
           
-          # 컨테이너 생성 (실행하지 않음)
-          docker create --name ${{ secrets.PROJECT_NAME }} ${{ secrets.PROJECT_NAME }}:latest
+          docker-compose up --build -d
+         
 
         EOF

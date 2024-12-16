@@ -10,6 +10,9 @@ COPY .env /app/.env
 COPY requirements.txt requirements.txt
 COPY . .
 
+# 로컬 fonts 폴더를 Docker 컨테이너로 복사
+COPY ./fonts /usr/share/fonts/
+
 # 필요한 패키지 설치
 RUN pip install --no-cache-dir -r requirements.txt
 
