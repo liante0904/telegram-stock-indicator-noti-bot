@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  us-52w-hl-stock:
+    build:
+      context: ./us
+    image: us-52w-hl-stock:latest
+    container_name: us-52w-hl-stock
+    env_file:
+      - ./us/.env
+    volumes:
+      - ./utils:/app/utils  # utils 디렉터리를 컨테이너에 마운트
+    working_dir: /app
+    command: ["tail", "-f", "/dev/null"]
+    restart: unless-stopped
+
+  jp-52w-hl-stock:
+    build:
+      context: ./jp
+    image: jp-52w-hl-stock:latest
+    container_name: jp-52w-hl-stock
+    env_file:
+      - ./jp/.env
+    volumes:
+      - ./utils:/app/utils  # utils 디렉터리를 컨테이너에 마운트
+    working_dir: /app
+    command: ["tail", "-f", "/dev/null"]
+    restart: unless-stopped
