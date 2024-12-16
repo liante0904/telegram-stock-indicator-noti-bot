@@ -51,10 +51,6 @@ def download_image(url, filename):
         response = requests.get(url, headers=headers, allow_redirects=True)
         response.raise_for_status()  # HTTP 에러 발생 시 예외 발생
 
-        # 최종 리다이렉트된 URL 확인 (필요 시)
-        final_url = response.url
-        print(f"리다이렉트된 최종 URL: {final_url}")
-
         with open(filename, 'wb') as f:
             f.write(response.content)
         return filename
@@ -62,7 +58,6 @@ def download_image(url, filename):
         return f"이미지 다운로드 실패: {e}"
     except Exception as e:
         return f"기타 오류 발생: {e}"
-
 
 def create_pdf(filename, data):
     """PDF 생성 함수
@@ -82,12 +77,17 @@ def create_pdf(filename, data):
     pdf.add_font('NanumGothic', '', f'{font_dir}/NanumGothic.ttf', uni=True)
     pdf.add_font('NanumGothic-Bold', '', f'{font_dir}/NanumGothicBold.ttf', uni=True)
 
+    # 데이터가 그룹화된 상태일 경우
     for sector, group in data:
         pdf.set_text_color(0, 0, 0)
+        
+        # 각 섹터 제목을 굵은 폰트로 출력
         pdf.set_font('NanumGothic-Bold', size=18)
         pdf.cell(200, 10, txt=f"섹터: {sector}", ln=True)
 
+        # 각 그룹 내의 항목들을 출력
         for _, item in group.iterrows():
+            # 티커를 굵은 폰트로 출력
             pdf.set_font('NanumGothic-Bold', size=18)
             pdf.cell(200, 10, txt=f"티커: {item['Ticker']}", ln=True)
 
