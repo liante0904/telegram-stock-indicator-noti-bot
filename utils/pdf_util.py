@@ -90,6 +90,7 @@ def create_pdf(filename, data):
             # 티커를 굵은 폰트로 출력
             pdf.set_font('NanumGothic-Bold', size=18)
             pdf.cell(200, 10, txt=f"티커: {item['Ticker']}", ln=True)
+            pdf.cell(200, 10, txt=f"종목명: {item['Name']}", ln=True)
 
             pdf.ln(10)
 
@@ -123,22 +124,25 @@ if __name__ == '__main__':
     high_52_week_stocks = [
         {
             "Ticker": "XEL",
+            "Name": "XEL",
             "Sector": "Utilities",
             "Business Profile": "Xcel Energy Inc.는 자회사를 통해 세대, 구매, 전송, 유통 및 전기 판매에 참여합니다. 조절 된 전기 유틸리티"
         },
         {
             "Ticker": "AAPL",
+            "Name": "애플",
             "Sector": "Technology",
             "Business Profile": "Apple Inc.는 혁신적인 전자제품, 소프트웨어 및 서비스의 설계, 제조 및 판매를 전문으로 합니다."
         },
         {
             "Ticker": "TSLA",
+            "Name": "테슬라",
             "Sector": "Automotive",
             "Business Profile": "Tesla Inc.는 전기차 설계 및 제조와 에너지 저장 시스템 개발에 집중하는 회사입니다."
         }
     ]
     # 결과를 데이터프레임으로 정리
-    high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Sector', 'Business Profile'])
+    high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Name','Sector', 'Business Profile'])
     
     # 데이터프레임 출력
     print("전체 데이터프레임:")

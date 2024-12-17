@@ -46,7 +46,7 @@ naver_api_topx = os.getenv('NAVER_API_TOPX')
 # Translator 객체 생성
 translator = Translator()
 
-# 네이버 API에서 topix 종목 가져오기
+# 네이버 API에서 TOPIX 종목 가져오기
 def get_topix_symbols_from_naver():
     url = naver_api_topx
     try:
@@ -54,13 +54,13 @@ def get_topix_symbols_from_naver():
         response.raise_for_status()  # HTTP 에러 발생 시 예외 처리
         data = response.json()
         stocks = data.get("stocks", [])
-        symbols = [f"{stock['symbolCode']}.T" for stock in stocks]  # '.T' 접미사 추가
-        print(f"총 {len(symbols)}개의 TOPIX 종목을 가져왔습니다.")
-        return symbols
+        symbols_with_names = [(f"{stock['symbolCode']}.T", stock['stockName']) for stock in stocks]  # (티커, 종목명) 쌍 생성
+        print(f"총 {len(symbols_with_names)}개의 TOPIX 종목을 가져왔습니다.")
+        return symbols_with_names
     except requests.RequestException as e:
         print(f"데이터를 가져오는 중 에러가 발생했습니다: {e}")
         return []
-
+    
 # 52주 신고가 종목 찾기
 async def find_52_week_high(yf_ticker):
     try: 
@@ -90,8 +90,8 @@ async def get_company_profile(yf_ticker):
 async def analyze_topix():
     print("TOPIX 종목 목록을 네이버 API에서 가져오는 중...")
     str_msg = ''
-    topix_tickers = get_topix_symbols_from_naver()
-    if not topix_tickers:
+    topix_tickers_with_names = get_topix_symbols_from_naver()
+    if not topix_tickers_with_names:
         print("TOPIX 목록을 가져오지 못했습니다.")
         return
 
@@ -101,19 +101,19 @@ async def analyze_topix():
     print("52주 신고가 종목을 분석 중...")
 
     # tqdm를 명시적으로 관리
-    with tqdm(total=len(topix_tickers), desc="Analyzing", unit="stock") as pbar:
-        for idx, ticker in enumerate(topix_tickers):
+    with tqdm(total=len(topix_tickers_with_names), desc="Analyzing", unit="stock") as pbar:
+        for idx, (ticker, name) in enumerate(topix_tickers_with_names):
             is_high = await find_52_week_high(ticker)
             pbar.update(1)  # 진행 상황 업데이트
-            print(f"Analyzing {ticker} ({idx + 1} of {len(topix_tickers)})...")
+            print(f"Analyzing {ticker} ({idx + 1} of {len(topix_tickers_with_names)})...")
             if not is_high:
-                print(f"{ticker}: 52주 신고가 아님.")
+                print(f"{ticker} ({name}): 52주 신고가 아님.")
                 continue  # 52주 신고가가 아니면 건너뜀
             profile = await get_company_profile(ticker)
-            high_52_week_stocks.append((ticker, profile['sector'], profile['description']))
-            # profile['sector'] 기준으로 정렬
-            high_52_week_stocks.sort(key=lambda x: x[1])  # sector(두 번째 요소) 기준으로 정렬
-            print(f"{ticker}: 52주 신고가 종목으로 추가됨.")
+            high_52_week_stocks.append((ticker, name, profile['sector'], profile['description']))
+            # sector(세 번째 요소) 기준으로 정렬
+            high_52_week_stocks.sort(key=lambda x: x[2])
+            print(f"{ticker} ({name}): 52주 신고가 종목으로 추가됨.")
 
     print('=' * 40)
     print("TOPIX 52주 신고가 종목 리스트")
@@ -126,14 +126,14 @@ async def analyze_topix():
         print(f"{high_52_week_stocks_list}")
     else:
         # 고정폭 글꼴을 사용한 표 형식
-        header = f"{'티커':<10} {'업종':<20}"
+        header = f"{'티커':<10} {'종목명':<15} {'업종':<20}"
         separator = "-" * len(header)
         high_52_week_stocks_list += "```\n"  # 시작 부분에 줄바꿈 추가
         high_52_week_stocks_list += header + "\n"  # 헤더 뒤에 줄바꿈 추가
         high_52_week_stocks_list += separator + "\n"  # 구분선 뒤에 줄바꿈 추가
 
-        for ticker, sector, description in high_52_week_stocks:
-            high_52_week_stocks_list += f"{ticker:<10} {sector:<20}\n"  # 각 항목 뒤에 줄바꿈 추가
+        for ticker, name, sector, description in high_52_week_stocks:
+            high_52_week_stocks_list += f"{ticker:<10} {name:<15} {sector:<20}\n"  # 각 항목 뒤에 줄바꿈 추가
 
         high_52_week_stocks_list += "```"
 
@@ -143,14 +143,14 @@ async def analyze_topix():
         print("\n52주 신고가 종목이 없습니다.")
     else:
         # 결과를 데이터프레임으로 정리
-        high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Sector', 'Business Profile'])
+        high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Name', 'Sector', 'Business Profile'])
 
         # 업종별로 그룹화하여 출력
         grouped_by_sector = high_52_week_df.groupby('Sector')
         for sector, group in grouped_by_sector:
             print(f"\n업종: {sector}")
             for idx, row in group.iterrows():
-                print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}")
+                print(f"티커: {row['Ticker']}\n종목명: {row['Name']}\n사업내용: {row['Business Profile']}")
 
         print("\nTOPIX 52주 신고가 종목 (업종별 분류 및 한글 번역된 사업내용 포함):")
         # PDF 생성

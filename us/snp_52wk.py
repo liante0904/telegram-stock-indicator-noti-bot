@@ -60,9 +60,9 @@ def get_sp500_symbols_from_naver():
         response.raise_for_status()  # HTTP 에러 발생 시 예외 처리
         data = response.json()
         stocks = data.get("stocks", [])
-        symbols = [stock["symbolCode"] for stock in stocks]
-        print(f"총 {len(symbols)}개의 S&P 500 종목을 가져왔습니다.")
-        return symbols
+        symbols_with_names = [(stock["symbolCode"], stock["stockName"]) for stock in stocks]
+        print(f"총 {len(symbols_with_names)}개의 S&P 500 종목을 가져왔습니다.")
+        return symbols_with_names
     except requests.RequestException as e:
         print(f"데이터를 가져오는 중 에러가 발생했습니다: {e}")
         return []
@@ -102,8 +102,8 @@ async def get_company_profile(ticker):
 async def analyze_sp500():
     print("S&P 500 종목 목록을 네이버 API에서 가져오는 중...")
     str_msg = ''
-    sp500_tickers = get_sp500_symbols_from_naver()
-    if not sp500_tickers:
+    sp500_tickers_with_names = get_sp500_symbols_from_naver()
+    if not sp500_tickers_with_names:
         print("S&P 500 목록을 가져오지 못했습니다.")
         return
 
@@ -113,20 +113,19 @@ async def analyze_sp500():
     print("52주 신고가 종목을 분석 중...")
 
     # tqdm 진행 상태와 종목별 처리 메시지를 함께 출력
-    with tqdm(total=len(sp500_tickers), desc="Analyzing", unit="stock") as pbar:
-        for idx, ticker in enumerate(sp500_tickers):
+    with tqdm(total=len(sp500_tickers_with_names), desc="Analyzing", unit="stock") as pbar:
+        for idx, (ticker, name) in enumerate(sp500_tickers_with_names):
             is_high = await find_52_week_high(ticker)
             pbar.update(1)  # 진행 상황 업데이트
-            print(f"Processed {idx + 1} of {len(sp500_tickers)}: {ticker}")
+            print(f"Analyzing {ticker} ({idx + 1} of {len(sp500_tickers_with_names)})...")
+            
             if not is_high:
-                print(f"{ticker}: 52주 신고가 아님.")
+                print(f"{name} ({ticker}): 52주 신고가 아님.")
                 continue  # 52주 신고가가 아니면 건너뜀
+            
             profile = await get_company_profile(ticker)
-            high_52_week_stocks.append((ticker, profile['sector'], profile['description']))
-            # profile['sector'] 기준으로 정렬
-            high_52_week_stocks.sort(key=lambda x: x[1])  # sector(두 번째 요소) 기준으로 정렬
-
-            print(f"{ticker}: 52주 신고가 종목으로 추가됨.")
+            high_52_week_stocks.append((ticker, name, profile['sector'], profile['description']))
+            print(f"{name} ({ticker}): 52주 신고가 종목으로 추가됨.")
 
     print('=' * 40)
     print("S&P 500 52주 신고가 종목 리스트")
@@ -139,14 +138,14 @@ async def analyze_sp500():
         print(f"{high_52_week_stocks_list}")
     else:
         # 고정폭 글꼴을 사용한 표 형식
-        header = f"{'티커':<10} {'업종':<20}"
+        header = f"{'티커':<10}{'종목명':<20}{'업종':<20}"
         separator = "-" * len(header)
         high_52_week_stocks_list += "```\n"  # 시작 부분에 줄바꿈 추가
         high_52_week_stocks_list += header + "\n"  # 헤더 뒤에 줄바꿈 추가
         high_52_week_stocks_list += separator + "\n"  # 구분선 뒤에 줄바꿈 추가
 
-        for ticker, sector, description in high_52_week_stocks:
-            high_52_week_stocks_list += f"{ticker:<10} {sector:<20}\n"  # 각 항목 뒤에 줄바꿈 추가
+        for ticker, name, sector, description in high_52_week_stocks:
+            high_52_week_stocks_list += f"{ticker:<10}{name:<20}{sector:<20}\n"
 
         high_52_week_stocks_list += "```"
 
@@ -156,7 +155,7 @@ async def analyze_sp500():
         print("\n52주 신고가 종목이 없습니다.")
     else:
         # 결과를 데이터프레임으로 정리
-        high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Sector', 'Business Profile'])
+        high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Name', 'Sector', 'Business Profile'])
 
 
         # 업종별로 그룹화하여 출력
@@ -171,6 +170,7 @@ async def analyze_sp500():
         send_pdf_file_name = ''
         if grouped_by_sector:
             send_pdf_file_name = create_pdf(pdf_file_name, grouped_by_sector)
+            print(f"\nPDF 파일이 생성되었습니다: {send_pdf_file_name}")
         else:
             print(f"52주 신고가 데이터가 없거나 올바르지 않습니다. => {grouped_by_sector}")
         return high_52_week_stocks_list, send_pdf_file_name
