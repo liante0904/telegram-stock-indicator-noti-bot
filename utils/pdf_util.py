@@ -96,7 +96,15 @@ def create_pdf(filename, data):
 
             ticker = item['Ticker']
             if is_valid_ticker(ticker):
-                img_url = f"https://finviz.com/chart.ashx?t={ticker}&ty=c&ta=1&p=d"
+                if ".T" in ticker:
+                    # 일본 주식 처리
+                    img_url = f"https://ssl.pstatic.net/imgfinance/chart/mobile/world/item/candle/day/{ticker}_end.png"
+                    pdf.set_font('NanumGothic', size=12)
+                    pdf.cell(0, 10, txt="일본 주식: 네이버 금융 차트를 사용합니다.", ln=True)
+                else:
+                    # 미국 주식 처리
+                    img_url = f"https://finviz.com/chart.ashx?t={ticker}&ty=c&ta=1&p=d"
+
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_img:
                     img_path = download_image(img_url, temp_img.name)
                     if img_path.endswith('.png'):
@@ -108,7 +116,7 @@ def create_pdf(filename, data):
                 os.remove(temp_img.name)
             else:
                 pdf.set_font('NanumGothic', size=12)
-                # pdf.cell(0, 10, txt=f"잘못된 Ticker 값: {ticker}", ln=True)
+                pdf.cell(0, 10, txt=f"잘못된 Ticker 값: {ticker}", ln=True)
 
             pdf.ln(10)
             pdf.set_font('NanumGothic', size=16)
