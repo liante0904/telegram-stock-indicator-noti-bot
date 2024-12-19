@@ -102,10 +102,11 @@ async def analyze_nasdaq100():
     nasdaq100_tickers_with_names = get_nasdaq100_symbols_from_naver()
     if not nasdaq100_tickers_with_names:
         print("NASDAQ 100 목록을 가져오지 못했습니다.")
-        return
+        return None, None  # 결과가 없으면 None 반환
 
     # 52주 신고가 종목을 저장할 리스트
     high_52_week_stocks = []
+    send_pdf_file_name = None  # PDF 파일명을 기본값으로 초기화
 
     print("52주 신고가 종목을 분석 중...")
 
@@ -148,9 +149,6 @@ async def analyze_nasdaq100():
 
         print(high_52_week_stocks_list)
 
-    if not high_52_week_stocks:
-        print("\n52주 신고가 종목이 없습니다.")
-    else:
         # 결과를 데이터프레임으로 정리
         high_52_week_df = pd.DataFrame(high_52_week_stocks, columns=['Ticker', 'Name', 'Sector', 'Business Profile'])
 
@@ -161,7 +159,6 @@ async def analyze_nasdaq100():
         print(f"\nPDF 파일이 생성되었습니다: {send_pdf_file_name}")
 
     return high_52_week_stocks_list, send_pdf_file_name
-
 
 if __name__ == '__main__':
     # 메인 함수 실행
