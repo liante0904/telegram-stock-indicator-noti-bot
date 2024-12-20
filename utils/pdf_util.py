@@ -15,18 +15,29 @@ load_dotenv()
 env = os.getenv('ENV')
 font_dir = os.getenv('FONT_DIR')
 
-
 def is_valid_ticker(ticker):
-    """Ticker 유효성 검사 함수
-
-    Args:
-        ticker (str): 검사할 Ticker 문자열
-
-    Returns:
-        bool: 유효하면 True, 아니면 False
     """
-    ticker_pattern = r'^[A-Z0-9-]+$'
-    return re.match(ticker_pattern, ticker)
+    주어진 티커가 유효한지 확인하는 함수입니다.
+    """
+    print(f"Checking ticker: {ticker}")
+
+    # 티커가 문자열인지 확인
+    if not isinstance(ticker, str):
+        print("Ticker is not a string.")
+        return False
+    
+    # 티커가 빈 문자열이 아닌지 확인
+    if not ticker.strip():
+        print("Ticker is an empty string.")
+        return False
+    
+    # 티커가 알파벳, 숫자, '.', '_'로만 구성되어 있는지 확인
+    if not all(c.isalnum() or c in {'.', '_'} for c in ticker):
+        print("Ticker contains invalid characters.")
+        return False
+        
+    print("Ticker is valid.")
+    return True
 
 def download_image(url, filename):
     """이미지 다운로드 함수
@@ -60,6 +71,7 @@ def download_image(url, filename):
         return f"기타 오류 발생: {e}"
 
 def create_pdf(filename, data):
+    print('create_pdf')
     """PDF 생성 함수
 
     Args:
@@ -79,6 +91,7 @@ def create_pdf(filename, data):
 
     # 데이터가 그룹화된 상태일 경우
     for sector, group in data:
+        print("""sector, group""")
         pdf.set_text_color(0, 0, 0)
         
         # 각 섹터 제목을 굵은 폰트로 출력
@@ -95,12 +108,14 @@ def create_pdf(filename, data):
             pdf.ln(10)
 
             ticker = item['Ticker']
+            print(ticker)
             if is_valid_ticker(ticker):
+                print(ticker)
                 if ".T" in ticker:
                     # 일본 주식 처리
                     img_url = f"https://ssl.pstatic.net/imgfinance/chart/mobile/world/item/candle/day/{ticker}_end.png"
-                    pdf.set_font('NanumGothic', size=12)
-                    pdf.cell(0, 10, txt="일본 주식: 네이버 금융 차트를 사용합니다.", ln=True)
+                    pdf.set_font('NanumGothic-Bold', size=18)
+                    pdf.cell(0, 10, txt=f"{item['Name']}({(item['Ticker'])})의 일봉차트", ln=True)
                 else:
                     # 미국 주식 처리
                     img_url = f"https://finviz.com/chart.ashx?t={ticker}&ty=c&ta=1&p=d"
@@ -147,6 +162,20 @@ if __name__ == '__main__':
             "Name": "테슬라",
             "Sector": "Automotive",
             "Business Profile": "Tesla Inc.는 전기차 설계 및 제조와 에너지 저장 시스템 개발에 집중하는 회사입니다."
+        }
+    ]
+    high_52_week_stocks = [
+        {
+            "Ticker": "7832.T",
+            "Name": "반다이남코 홀딩스",
+            "Sector": "Consumer Cyclical",
+            "Business Profile": "Bandai Namco Holdings Inc.는 전 세계 엔터테인먼트 관련 제품 및 서비스를 개발합니다.이 회사는 디지털 비즈니스, 장난감 및 취미 비즈니스, IP 생산 사업 및 놀이"
+        },
+        {
+            "Ticker": "7751.T",
+            "Name": "캐논",
+            "Sector": "Technology",
+            "Business Profile": "Apple Inc.는 혁신적인 전자제품, 소프트웨어 및 서비스의 설계, 제조 및 판매를 전문으로 합니다."
         }
     ]
     # 결과를 데이터프레임으로 정리
