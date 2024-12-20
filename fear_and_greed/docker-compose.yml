@@ -1,0 +1,18 @@
+version: '3'
+services:
+  selenium:
+    image: seleniarm/standalone-chromium:latest
+    container_name: selenium
+    shm_size: '512m'
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+
+  app:
+    build: .
+    depends_on:
+      - selenium
+    environment:
+      - SELENIUM_HOST=selenium
+    volumes:
+      - .:/app
