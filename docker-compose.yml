@@ -34,7 +34,7 @@ services:
       - "7900:7900"
     restart: unless-stopped
     networks:
-      - selenium
+      - my_network
   fear_and_greed:
     build:
       context: ./fear_and_greed
@@ -51,8 +51,8 @@ services:
     depends_on:
       - selenium
     networks:
-      - selenium
+      - my_network
 
 networks:
-  selenium:
+  my_network:
     driver: bridge
