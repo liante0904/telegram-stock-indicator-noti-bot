@@ -24,7 +24,7 @@ services:
     working_dir: /app
     command: ["tail", "-f", "/dev/null"]
     restart: unless-stopped
-    
+
   selenium:
     image: seleniarm/standalone-chromium:latest
     container_name: selenium
@@ -34,7 +34,8 @@ services:
       - "7900:7900"
     restart: unless-stopped
     networks:
-      - my_network
+      - selenium_network
+
   fear_and_greed:
     build:
       context: ./fear_and_greed
@@ -51,8 +52,8 @@ services:
     depends_on:
       - selenium
     networks:
-      - my_network
+      - selenium_network
 
 networks:
-  my_network:
+  selenium_network:
     driver: bridge
