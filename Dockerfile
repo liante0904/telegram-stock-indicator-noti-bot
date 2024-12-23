@@ -12,9 +12,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 3. 애플리케이션 파일 및 기타 리소스 복사
 COPY main.py main.py
-COPY .env .env
 COPY modules/ modules/
 COPY utils/ utils/
+COPY .env us/.env
+COPY .env jp/.env
+COPY .env fear_and_greed/.env
 
 
 # 로컬 fonts 폴더를 Docker 컨테이너로 복사

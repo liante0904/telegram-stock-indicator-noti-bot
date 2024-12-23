@@ -53,12 +53,14 @@ jobs:
           git pull origin master
 
           # .env 갱신
-          cp -rf .env ./jp/.
-          cp -rf .env ./us/.
-          
+          cp -rf .env ./jp/.env
+          cp -rf .env ./us/.env
+          cp -rf .env ./fear_and_greed/.env
+
           # fonts 폴더 갱신
           cp -rf fonts/ jp/
           cp -rf fonts/ us/
+          
           # Docker-compose로 배포
           echo "Deploying with Docker Compose for ${{ secrets.PROJECT_NAME }} ..."
           

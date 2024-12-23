@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   us-52w-hl-stock:
     build:
@@ -34,11 +32,12 @@ services:
     ports:
       - "4444:4444"
       - "7900:7900"
-
+    restart: unless-stopped
+    networks:
+      - selenium
   fear_and_greed:
     build:
       context: ./fear_and_greed
-    image: fear_and_greed:latest
     container_name: fear_and_greed
     env_file:
       - ./fear_and_greed/.env
@@ -47,5 +46,13 @@ services:
     working_dir: /app
     command: ["python3", "app.py"]
     restart: no
+    depends_on:
+      - selenium
     environment:
       - MODE=deploy
+    networks:
+      - selenium
+
+networks:
+  selenium:
+    driver: bridge
