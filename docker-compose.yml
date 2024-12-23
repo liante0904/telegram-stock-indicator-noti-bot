@@ -46,10 +46,10 @@ services:
     working_dir: /app
     command: ["python3", "app.py"]
     restart: no
-    depends_on:
-      - selenium
     environment:
       - MODE=deploy
+    depends_on:
+      - selenium
     networks:
       - selenium
 
