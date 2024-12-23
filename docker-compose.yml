@@ -26,3 +26,26 @@ services:
     working_dir: /app
     command: ["tail", "-f", "/dev/null"]
     restart: unless-stopped
+    
+  selenium:
+    image: seleniarm/standalone-chromium:latest
+    container_name: selenium
+    shm_size: '512m'
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+
+  fear_and_greed:
+    build:
+      context: ./fear_and_greed
+    image: fear_and_greed:latest
+    container_name: fear_and_greed
+    env_file:
+      - ./fear_and_greed/.env
+    volumes:
+      - ./utils:/app/utils  # utils 디렉터리를 컨테이너에 마운트
+    working_dir: /app
+    command: ["python3", "app.py"]
+    restart: no
+    environment:
+      - MODE=deploy
