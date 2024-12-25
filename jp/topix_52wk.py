@@ -41,7 +41,7 @@ from utils.pdf_util import create_pdf
 
 # 환경 변수 사용
 env = os.getenv('ENV')
-naver_api_topx = os.getenv('NAVER_API_TOPX')
+naver_api_topx = os.getenv('NAVER_API_TOPIX')
 
 # Translator 객체 생성
 translator = Translator()
