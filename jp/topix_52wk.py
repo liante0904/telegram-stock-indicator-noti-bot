@@ -64,7 +64,7 @@ def get_topix_symbols_from_naver():
 # 52주 신고가 종목 찾기
 async def find_52_week_high(yf_ticker):
     try: 
-        stock_data = yf.download(yf_ticker, period='1y', interval='1d', progress=False)['Adj Close']
+        stock_data = yf.download(yf_ticker, period='1y', interval='1d', progress=False, auto_adjust=False)['Adj Close']
         if len(stock_data) == 0:
             return False  # 주가 데이터가 없는 경우 제외
         # 52주 최고가를 계산하고, 최근 주가가 52주 최고가와 같은지 확인
