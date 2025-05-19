@@ -19,7 +19,6 @@ def is_valid_ticker(ticker):
     """
     주어진 티커가 유효한지 확인하는 함수입니다.
     """
-    print(f"Checking ticker: {ticker}")
 
     # 티커가 문자열인지 확인
     if not isinstance(ticker, str):
@@ -160,7 +159,7 @@ def create_pdf(filename, data):
             ticker = item['Ticker']
             print(ticker)
             if is_valid_ticker(ticker):
-                print(ticker)
+                
                 # 미국&일본 주식 일봉 이미지처리
                 img_url = f"https://ssl.pstatic.net/imgfinance/chart/mobile/world/item/candle/day/{ticker}_end.png"
                 pdf.set_font('NanumGothic-Bold', size=18)
