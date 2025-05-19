@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y curl ca-certificates \
 # uv 설치
 RUN curl -Ls https://astral.sh/uv/install.sh | sh
 
+# uv 경로 추가
+ENV PATH="/root/.cargo/bin:$PATH"
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
