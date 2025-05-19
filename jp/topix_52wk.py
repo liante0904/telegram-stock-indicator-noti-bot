@@ -1,5 +1,4 @@
 import requests
-import yfinance as yf
 import pandas as pd
 from googletrans import Translator
 import numpy as np
@@ -113,12 +112,10 @@ async def get_company_profile(stock_code):
         
         # JSON 데이터 파싱
         stock_info = response.json()
-        print(f"Raw stock_info: {stock_info}")  # 디버깅용 출력
         
         # 사업 내용 추출
         if 'corporateOverview' in stock_info:
             description = stock_info['corporateOverview']
-            print(description)
         else:
             print(f"'corporateOverview' 키가 stock_info에 없습니다.")
             return False
@@ -184,7 +181,6 @@ async def analyze_topix():
 
         high_52_week_stocks_list += "```"
 
-        print(high_52_week_stocks_list)
 
     if not high_52_week_stocks:
         print("\n52주 신고가 종목이 없습니다.")

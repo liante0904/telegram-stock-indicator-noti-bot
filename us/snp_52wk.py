@@ -1,5 +1,4 @@
 import requests
-import yfinance as yf
 import pandas as pd
 from googletrans import Translator
 import numpy as np
@@ -60,7 +59,6 @@ def get_sp500_symbols_from_naver():
         response.raise_for_status()  # HTTP 에러 발생 시 예외 처리
         data = response.json()
         stocks = data.get("stocks", [])
-        print(stocks)
         print(f"총 {len(stocks)}개의 S&P 500 종목을 가져왔습니다.")
         symbols_with_names = [(stock["reutersCode"], stock["stockName"]) for stock in stocks]
         print(f"총 {len(symbols_with_names)}개의 S&P 500 종목을 가져왔습니다.")
@@ -192,7 +190,6 @@ async def analyze_sp500():
 
         high_52_week_stocks_list += "```"
 
-        print(high_52_week_stocks_list)
         
     if not high_52_week_stocks:
         print("\n52주 신고가 종목이 없습니다.")
@@ -216,19 +213,6 @@ async def analyze_sp500():
         else:
             print(f"52주 신고가 데이터가 없거나 올바르지 않습니다. => {grouped_by_sector}")
         return high_52_week_stocks_list, send_pdf_file_name
-        # for sector, group in grouped_by_sector:
-            # print(f"\n업종: {sector}")
-            # for idx, row in group.iterrows():
-            #     # print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 원본
-                
-            #     # 'Business Profile'을 문단별로 나누어 처리
-            #     sentences = row['Business Profile'].split('다.')
-
-            #     # 첫 4문단만 합쳐서 다시 row['Business Profile']에 저장
-            #     paragraphs = [sentence.strip() + '다.' for sentence in sentences[0:3]]
-            #     row['Business Profile'] = ' '.join(paragraphs)
-            #     print(f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n") # 요약
-            #     str_msg += f"티커: {row['Ticker']}\n사업내용: {row['Business Profile']}\n\n\n"
 
 if __name__ == '__main__':
     # 메인 함수 실행

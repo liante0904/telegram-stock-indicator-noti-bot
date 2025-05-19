@@ -1,5 +1,4 @@
 import requests
-import yfinance as yf
 import pandas as pd
 from googletrans import Translator
 import numpy as np
@@ -59,7 +58,6 @@ def get_nasdaq100_symbols_from_naver():
         response.raise_for_status()  # HTTP 에러 발생 시 예외 처리
         data = response.json()
         stocks = data.get("stocks", [])
-        print(stocks)
         print(f"총 {len(stocks)}개의 NASDAQ 100 종목을 가져왔습니다.")
         
         symbols_with_names = [(stock["reutersCode"], stock["stockName"]) for stock in stocks]
@@ -166,7 +164,6 @@ async def analyze_nasdaq100():
             if not is_high:
                 print(f"{name} ({ticker}): 52주 신고가 아님.")
                 continue  # 52주 신고가가 아니면 건너뜀
-            
             profile['description'] = await get_company_profile(ticker)
             high_52_week_stocks.append((ticker, name, profile['sector'], profile['description']))
             # profile['sector'] 기준으로 정렬
@@ -195,7 +192,6 @@ async def analyze_nasdaq100():
 
         high_52_week_stocks_list += "```"
 
-        print(high_52_week_stocks_list)
         
     if not high_52_week_stocks:
         print("\n52주 신고가 종목이 없습니다.")
