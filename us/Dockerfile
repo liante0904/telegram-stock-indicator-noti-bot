@@ -20,7 +20,14 @@ COPY requirements.txt requirements.txt
 # 의존성 설치 (uv pip 사용)
 RUN pip install uv
 
-# 의존성 설치 (uv pip 사용)
+
+# uv가 설치된 경로 확인 (optional)
+RUN which uv
+
+# uv 실행이 가능한 경로를 PATH에 추가 (예: /root/.local/bin)
+ENV PATH="/root/.local/bin:$PATH"
+
+# uv를 통해 requirements 설치
 RUN uv pip install -r requirements.txt
 
 # 소스 코드 복사
