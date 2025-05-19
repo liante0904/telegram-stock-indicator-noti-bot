@@ -18,7 +18,9 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 
 # 의존성 설치 (uv pip 사용)
-RUN uv pip install -r requirements.txt
+
+# uv 경로 직접 지정해서 설치
+RUN /root/.cargo/bin/uv pip install -r requirements.txt
 
 # 소스 코드 복사
 COPY . .
