@@ -5,9 +5,6 @@ FROM python:3.10.12-slim
 RUN apt-get update && apt-get install -y curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# uv 설치
-RUN curl -Ls https://astral.sh/uv/install.sh | sh
-
 # uv 경로 추가
 ENV PATH="/root/.cargo/bin:$PATH"
 
