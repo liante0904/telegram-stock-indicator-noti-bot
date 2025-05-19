@@ -139,7 +139,6 @@ async def get_company_profile(stock_code):
 # 메인 함수: nikkei225 종목 분석
 async def analyze_nikkei225():
     print("nikkei225 종목 목록을 네이버 API에서 가져오는 중...")
-    str_msg = ''
     nikkei225_tickers_with_names = get_nikkei225_symbols_from_naver()
     if not nikkei225_tickers_with_names:
         print("nikkei225 목록을 가져오지 못했습니다.")
